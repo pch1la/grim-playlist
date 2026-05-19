@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GRIM — Плейлист / Darius Okafor / Cyberpunk RED</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --red: #C0392B;
+    --red-dim: rgba(192,57,43,0.15);
+    --red-glow: rgba(192,57,43,0.4);
+    --bg: #0b0b0b;
+    --bg2: #111111;
+    --bg3: #161616;
+    --text: #e0dbd2;
+    --muted: #666;
+    --border: #222;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Mono', monospace;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* grain overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.6;
+  }
+
+  /* scanlines */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.03) 2px,
+      rgba(0,0,0,0.03) 4px
+    );
+    pointer-events: none;
+    z-index: 999;
+  }
+
+  /* HEADER */
+  header {
+    border-bottom: 1px solid var(--border);
+    padding: 48px 40px 36px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  header::before {
+    content: '';
+    position: absolute;
+    left: -80px; top: -80px;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(192,57,43,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .header-eyebrow {
+    font-size: 11px;
+    letter-spacing: 4px;
+    color: var(--red);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(52px, 10vw, 96px);
+    letter-spacing: 4px;
+    line-height: 0.9;
+    color: var(--text);
+  }
+
+  h1 span {
+    color: var(--red);
+  }
+
+  .header-sub {
+    margin-top: 16px;
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .header-quote {
+    margin-top: 24px;
+    padding-left: 20px;
+    border-left: 3px solid var(--red);
+    font-size: 13px;
+    font-style: italic;
+    color: #888;
+    max-width: 560px;
+    line-height: 1.7;
+  }
+
+  /* NAV */
+  nav {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  nav::-webkit-scrollbar { display: none; }
+
+  .nav-btn {
+    background: none;
+    border: none;
+    border-right: 1px solid var(--border);
+    padding: 14px 24px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s;
+    position: relative;
+  }
+
+  .nav-btn::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--red);
+    transform: scaleX(0);
+    transition: transform 0.2s;
+  }
+
+  .nav-btn:hover { color: var(--text); }
+  .nav-btn.active { color: var(--red); }
+  .nav-btn.active::after { transform: scaleX(1); }
+
+  /* MAIN */
+  main {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 40px 80px;
+  }
+
+  /* SECTION */
+  .section {
+    display: none;
+    animation: fadeIn 0.3s ease;
+  }
+
+  .section.active { display: block; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .section-header {
+    padding: 40px 0 24px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 8px;
+  }
+
+  .section-tag {
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--red);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 32px;
+    letter-spacing: 2px;
+    color: var(--text);
+    line-height: 1;
+  }
+
+  .section-desc {
+    margin-top: 10px;
+    font-size: 12px;
+    color: var(--muted);
+    font-style: italic;
+    line-height: 1.6;
+  }
+
+  /* TRACK */
+  .track {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.15s;
+    position: relative;
+    cursor: pointer;
+  }
+
+  .track::before {
+    content: '';
+    position: absolute;
+    left: -40px; right: -40px;
+    top: 0; bottom: 0;
+    background: var(--red-dim);
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+
+  .track:hover::before { opacity: 1; }
+  .track:hover .track-num { color: var(--red); }
+  .track:hover .track-title { color: var(--red); }
+  .track:hover .track-arrow { opacity: 1; transform: translateX(0); }
+
+  .track-num {
+    font-size: 11px;
+    color: var(--muted);
+    min-width: 28px;
+    text-align: right;
+    transition: color 0.15s;
+    position: relative;
+    z-index: 1;
+  }
+
+  .track-info {
+    flex: 1;
+    position: relative;
+    z-index: 1;
+  }
+
+  .track-title {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    transition: color 0.15s;
+    line-height: 1.3;
+  }
+
+  .track-artist {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 2px;
+    font-style: italic;
+  }
+
+  .track-arrow {
+    font-size: 11px;
+    color: var(--red);
+    opacity: 0;
+    transform: translateX(-6px);
+    transition: all 0.15s;
+    position: relative;
+    z-index: 1;
+    letter-spacing: 1px;
+  }
+
+  .track-note {
+    font-size: 10px;
+    color: #444;
+    font-style: italic;
+    margin-top: 3px;
+  }
+
+  /* FOOTER */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 24px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  footer span { color: var(--red); }
+
+  /* ABOUT tab */
+  .about-block {
+    padding: 32px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .about-label {
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--red);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .about-text {
+    font-size: 13px;
+    color: #999;
+    line-height: 1.8;
+    max-width: 640px;
+  }
+
+  .about-text strong {
+    color: var(--text);
+    font-weight: 700;
+  }
+
+  .stat-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-top: 32px;
+  }
+
+  .stat {
+    background: var(--bg2);
+    padding: 20px;
+    text-align: center;
+  }
+
+  .stat-val {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 36px;
+    color: var(--red);
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+
+  /* GITHUB tab */
+  .step {
+    padding: 28px 0;
+    border-bottom: 1px solid var(--border);
+    display: grid;
+    grid-template-columns: 48px 1fr;
+    gap: 20px;
+    align-items: start;
+  }
+
+  .step-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 40px;
+    color: var(--red);
+    line-height: 1;
+    opacity: 0.6;
+  }
+
+  .step-title {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+    color: var(--text);
+  }
+
+  .step-text {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.8;
+  }
+
+  .step-text strong { color: var(--text); }
+
+  code {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    padding: 2px 8px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--red);
+    border-radius: 2px;
+  }
+
+  .code-block {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--red);
+    padding: 14px 16px;
+    margin-top: 10px;
+    font-size: 11px;
+    color: #aaa;
+    line-height: 1.8;
+    overflow-x: auto;
+  }
+
+  .tip {
+    background: var(--red-dim);
+    border: 1px solid var(--red-glow);
+    padding: 12px 16px;
+    margin-top: 10px;
+    font-size: 11px;
+    color: #bbb;
+    line-height: 1.7;
+  }
+
+  .tip strong { color: var(--red); }
+
+  /* mobile */
+  @media (max-width: 600px) {
+    header { padding: 32px 20px 24px; }
+    main { padding: 0 20px 60px; }
+    footer { padding: 20px; flex-direction: column; gap: 8px; text-align: center; }
+    nav { padding: 0; }
+    .nav-btn { padding: 12px 16px; font-size: 9px; }
+    .track::before { left: -20px; right: -20px; }
+    .stat-row { grid-template-columns: 1fr; }
+    .step { grid-template-columns: 36px 1fr; gap: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-eyebrow">Cyberpunk RED · Night City · 2045</div>
+  <h1>DARIUS<br><span>"GRIM"</span><br>OKAFOR</h1>
+  <div class="header-sub">Уличный художник · Битбоксер · Rockerboy · Boom Bap пурист</div>
+  <div class="header-quote">
+    «Алгоритм не знает, что такое потеря. Он знает паттерны. А паттерн — это труп настоящего бита.»
+  </div>
+</header>
+
+<nav>
+  <button class="nav-btn active" onclick="showSection('roots')">01 — Корни</button>
+  <button class="nav-btn" onclick="showSection('personal')">02 — Личное</button>
+  <button class="nav-btn" onclick="showSection('beatbox')">03 — Битбокс</button>
+  <button class="nav-btn" onclick="showSection('walls')">04 — Стены</button>
+  <button class="nav-btn" onclick="showSection('night')">05 — Ночь</button>
+  <button class="nav-btn" onclick="showSection('about')">О персонаже</button>
+
+</nav>
+
+<main>
+
+  <!-- 01 КОРНИ -->
+  <div class="section active" id="sec-roots">
+    <div class="section-header">
+      <div class="section-tag">Раздел 01</div>
+      <div class="section-title">Корни — то что крутил отец</div>
+      <div class="section-desc">Ритуал с иглой на пластинке. Дариус засыпал под это с трёх лет. Голден эра в чистом виде.</div>
+    </div>
+
+    <a class="track" href="https://www.youtube.com/results?search_query=DJ+Premier+Guru+Mass+Appeal" target="_blank">
+      <div class="track-num">01</div>
+      <div class="track-info">
+        <div class="track-title">Mass Appeal</div>
+        <div class="track-artist">DJ Premier & Guru · Gang Starr</div>
+        <div class="track-note">Прима — его личный бог продакшна</div>
+      </div>
+      <div class="track-arrow">↗ YT</div>
+    </a>
+
+    <a class="track" href="https://www.youtube.com/results?search_query=Pete+Rock+CL+Smooth+They+Reminisce+Over+You" target="_blank">
+      <div class="track-num">02</div>
+      <div class="track-info">
+        <div class="track-title">They Reminisce Over You</div>
+        <div class="track-artist">Pete Rock & CL Smooth</div>
+        <div class="track-note">Слушает когда думает о матери</div>
+      </div>
+      <div class="track-arrow">↗ YT</div>
+    </a>
+
+    <a class="track" href="https://www.youtube.com/results?search_query=Nas+NY+State+of+Mind+Illmatic" target="_blank">
+      <div class="track-num">03</div>
+      <div class="track-info">
+        <div class="track-title">N.Y. State of Mind</div>
+        <div class="track-artist">Nas · Illmatic</div>
+        <div class="track-note">Оригинальный пресс 1994 — украден. Ищет до сих пор.</div>
+      </div>
+      <div class="track-arrow">↗ YT</div>
+    </a>
+
+    <a class="track" href="https://www.youtube.com/results?search_query=Rakim+Follow+The+Leader" target="_blank">
+      <div class="track-num">04</div>
+      <div class="track-info">
+        <div class="track-title">Follow the Leader</div>
+        <div class="track-artist">Rakim</div>
+      </div>
+      <div class="track-arrow">↗ YT</div>
+    </a>
+
+    <a class="track" href="https://www.youtube.com/results?search_query=Big+L+Put+It+On" target="_blank">
+      <div class="track-num">05</div>
+      <div class="track-info">
+        <div class="track-title">Put It On</div>
+        <div class="track-artist">Big L</div>
+      </div>
+      <div class="track-arrow">↗ YT</div>
+    </a>
+
+    <a class="track" href="https://www.youtube.com/results?search_query=Gang+Starr+Moment+of+Truth" target="_blank">
+      <div class="track-num">06</div>
+      <div class="track-info">
+        <div class="track-title">Moment of Truth</div>
+        <div class="track-artist">Gang Starr</div>
+      </div>
+      <div class="track-arrow">↗ YT</div>
+    </a>
+
+    <a class="track" href="https://www.youtube.com/results?search_query=A+Tribe+Called+Quest+Electric+Relaxation" target="_blank">
+      <div class="track-num">07</div>
+      <div class="track-info">
+        <div class="track-title">Electric Relaxation</div>
+        <div class="track-artist">A Tribe Called Quest</div>
+      </div>
+      <div class="track-arrow">↗ YT</div>
+    </a>
+
+    <a class="track" href="https://www.youtube.com/results?search_query=Wu-Tang+Clan+CREAM" target="_blank">
+      <div class="track-num">08</div>
+      <div class="track-info">
+        <div class="track-title">C.R.E.A.M.</div>
+        <div class="track-artist">Wu-Tang Clan</div>
+      </div>
+      <div class="track-arrow">↗ YT</div>
+    </a>
+
+    <a class="track" href="https://www.youtube.com/results?search_query=Notorious+BIG+Juicy" target="_blank">
+      <div class="track-num">09</div>
+      <div class="track-info">
+        <div class="track-title">Juicy</div>
+        <div class="track-artist">The Notorious B.I.G.</div>
+      </div>
+      <div class="track-arrow">↗ YT</div>
+    </a>
+
+    <a class="track" href="https://www.youtube.com/results?search_query=KRS-One+Sound+of+da+Police" target="_blank">
+      <div class="track-num">10</div>
+      <div class="track-info">
+        <div class="track-title">Sound of da Police</div>
+        <div class="track-artist">KRS-One</div>
+      </div>
+      <div class="track-arrow">↗ YT</div>
+    </a>
+  </div>
+
+  <!-- 02 ЛИЧНОЕ -->
+  <div class="section" id="sec-personal">
+    <div class="section-header">
+      <div class="section-tag">Раздел 02</div>
+      <div class="section-title">Личное — слушает когда рисует</div>
+      <div class="section-desc">Инструменталы. Ничто не мешает. Только краска и бит.</div>
+    </div>
+
+    <a class="track" href="https://www.youtube.com/results?search_query=DJ+Premier+Boom+instrumental" target="_blank">
+      <div class="track-num">01</div>
+      <div class="track-info">
+        <div class="track-title">Boom (instrumental)</div>
+        <div class="track-artist">DJ Premier</div>
+      </div>
+      <div class="track-arrow">↗ YT</div>
+    </a>
+
+    <a class="track" href="https://www.youtube.com/results?search_query=J+Dilla+Donuts+full+album" target="_blank">
+      <div class="track-num">02</div>
+      <div class="track-info">
+        <div class="track-title">Donuts</div>
+        <div class="track-artist">J Dilla · полный альбом</div>
+        <div class="track-note">Без остановки. Всегда целиком.</div>
+      </div>
+      <div class="track-arrow">↗ YT</div>
+    </a>
+
+    <a class="track" href="https://www.youtube.com/results?search_query=Madlib+Shades+of+Blue+full+album" target="_blank">
+      <div class="track-num">03</div>
+      <div class="track-info">
+        <div class="track-title">Shades of Blue</div>
+        <div class="track-artist">Madlib · полный альбом</div>
+      </div>
+      <div class="track-arrow">↗ YT</div>
+    </a>
+
+    <a class="track" href="https://www.youtube.com/results?search_query=MF+DOOM+Madlib+Accordion+Madvillainy" target="_blank">
+      <div class="track-num">04</div>
+      <div class="track-info">
+        <div class="track-title">Accordion</div>
+        <div class="track-artist">MF DOOM & Madlib · Madvillainy</div>
+      </div>
+      <div class="track-arrow">↗ YT</div>
+    </a>
+
+    <a class="track" href="https://www.youtube.com/results?search_query=Ghostface+Killah+Ironman+full+album" target="_blank">
+      <div class="track-num">05</div>
+      <div class="track-info">
+        <div class="track-title">Ironman</div>
+        <div class="track-artist">Ghostface Killah · полный альбом</div>
+      </div>
+      <div class="track-arrow">↗ YT</div>
+    </a>
+
+    <a class="track" href="https://www.youtube.com/results?search_query=Ol+Dirty+Bastard+Shimmy+Shimmy+Ya" target="_blank">
+      <div class="track-num">06</div>
+      <div class="track-info">
+        <div class="track-title">Shimmy Shimmy Ya</div>
+        <div class="track-artist">Ol' Dirty Bastard</div>
+      </div>
+      <div class="track-arrow">↗ YT</div>
+    </a>
+
+    <a class="track" href="https://www.youtube.com/results?search_query=Method+Man+Bring+the+Pain" target="_blank">
+      <div class="track-num">07</div>
+      <div class="track-info">
+        <div class="track-title">Bring the Pain</div>
+        <div class="track-artist">Method Man</div>
+      </div>
+      <div class="track-arrow">↗ YT</div>
+    </a>
+
+    <a class="track" href="https://www.youtube.com/results?search_query=Pete+Rock+Take+You+There+instrumental" target="_blank">
+      <div class="track-num">08</div>
+      <div class="track-info">
+        <div class="track-title">Take You There (instrumental)</div>
+        <div class="track-artist">Pete Rock</div>
+      </div>
+      <div class="track-arrow">↗ YT</div>
+    </a>
+  </div>
+
+  <!-- 03 БИТБОКС -->
+  <div class="section" id="sec-beatbox">
+    <div class="section-header">
+      <div class="section-tag">Раздел 03</div>
+      <div class="section-title">Битбокс и перформанс</div>
+      <div class="section-desc">То что он воспроизводит горлом. Никакой техники — только лёгкие и годы практики.</div>
+    </div>
+
+    <a class="track" href="https://www.youtube.com/results?search_query=Rahzel+If+Your+Mother+Only+Knew+live" target="_blank">
+      <div class="track-num">01</div>
+      <div class="track-info">
+        <div class="track-title">If Your Mother Only Knew (live)</div>
+        <div class="track-artist">Rahzel</div>
+        <div class="track-note">Эталон. Смотреть живое выступление.</div>
+      </div>
+      <div class="track-arrow">↗ YT</div>
+    </a>
+
+    <a class="track" href="https://www.youtube.com/results?search_query=Biz+Markie+Just+a+Friend" target="_blank">
+      <div class="track-num">02</div>
+      <div class="track-info">
+        <div class="track-title">Just a Friend</div>
+        <div class="track-artist">Biz Markie</div>
+      </div>
+      <div class="track-arrow">↗ YT</div>
+    </a>
+
+    <a class="track" href="https://www.youtube.com/results?search_query=Doug+E+Fresh+La+Di+Da+Di" target="_blank">
+      <div class="track-num">03</div>
+      <div class="track-info">
+        <div class="track-title">La Di Da Di</div>
+        <div class="track-artist">Doug E. Fresh & Slick Rick</div>
+        <div class="track-note">Первый битбокс который он выучил. В двенадцать лет.</div>
+      </div>
+      <div class="track-arrow">↗ YT</div>
+    </a>
+
+    <a class="track" href="https://www.youtube.com/results?search_query=Slick+Rick+Children%27s+Story" target="_blank">
+      <div class="track-num">04</div>
+      <div class="track-info">
+        <div class="track-title">Children's Story</div>
+        <div class="track-artist">Slick Rick</div>
+      </div>
+      <div class="track-arrow">↗ YT</div>
+    </a>
+  </div>
+
+  <!-- 04 СТЕНЫ -->
+  <div class="section" id="sec-walls">
+    <div class="section-header">
+      <div class="section-tag">Раздел 04</div>
+      <div class="section-title">Для стен — когда злится на город</div>
+      <div class="section-desc">Это не музыка для отдыха. Это топливо. Включает перед тем как выйти ночью.</div>
+    </div>
+
+    <a class="track" href="https://www.youtube.com/results?search_query=NWA+Fuck+tha+Police" target="_blank">
+      <div class="track-num">01</div>
+      <div class="track-info">
+        <div class="track-title">Fuck tha Police</div>
+        <div class="track-artist">N.W.A.</div>
+        <div class="track-note">Классика. Актуальна в 2045 так же как в 1988.</div>
+      </div>
+      <div class="track-arrow">↗ YT</div>
+    </a>
+
+    <a class="track" href="https://www.youtube.com/results?search_query=Ice+Cube+AmeriKKKa%27s+Most+Wanted" target="_blank">
+      <div class="track-num">02</div>
+      <div class="track-info">
+        <div class="track-title">AmeriKKKa's Most Wanted</div>
+        <div class="track-artist">Ice Cube · полный альбом</div>
+      </div>
+      <div class="track-arrow">↗ YT</div>
+    </a>
+
+    <a class="track" href="https://www.youtube.com/results?search_query=Public+Enemy+Fight+the+Power" target="_blank">
+      <div class="track-num">03</div>
+      <div class="track-info">
+        <div class="track-title">Fight the Power</div>
+        <div class="track-artist">Public Enemy</div>
+      </div>
+      <div class="track-arrow">↗ YT</div>
+    </a>
+
+    <a class="track" href="https://www.youtube.com/results?search_query=Dead+Prez+Hip+Hop" target="_blank">
+      <div class="track-num">04</div>
+      <div class="track-info">
+        <div class="track-title">Hip Hop</div>
+        <div class="track-artist">Dead Prez</div>
+        <div class="track-note">«I'm sick of that fake thug R&B rap scenario» — в точку про его мир</div>
+      </div>
+      <div class="track-arrow">↗ YT</div>
+    </a>
+
+    <a class="track" href="https://www.youtube.com/results?search_query=Mos+Def+Mathematics" target="_blank">
+      <div class="track-num">05</div>
+      <div class="track-info">
+        <div class="track-title">Mathematics</div>
+        <div class="track-artist">Mos Def</div>
+      </div>
+      <div class="track-arrow">↗ YT</div>
+    </a>
+
+    <a class="track" href="https://www.youtube.com/results?search_query=Talib+Kweli+Get+By" target="_blank">
+      <div class="track-num">06</div>
+      <div class="track-info">
+        <div class="track-title">Get By</div>
+        <div class="track-artist">Talib Kweli</div>
+      </div>
+      <div class="track-arrow">↗ YT</div>
+    </a>
+  </div>
+
+  <!-- 05 НОЧЬ -->
+  <div class="section" id="sec-night">
+    <div class="section-header">
+      <div class="section-tag">Раздел 05</div>
+      <div class="section-title">Поздно ночью</div>
+      <div class="section-desc">Работа сделана. Он стоит смотрит. Краска ещё мокрая.</div>
+    </div>
+
+    <a class="track" href="https://www.youtube.com/results?search_query=Nujabes+Feather" target="_blank">
+      <div class="track-num">01</div>
+      <div class="track-info">
+        <div class="track-title">Feather</div>
+        <div class="track-artist">Nujabes ft. Cise Starr</div>
+        <div class="track-note">Единственный исключение из правила — не классический бум бэп. Но Nujabes — это другое.</div>
+      </div>
+      <div class="track-arrow">↗ YT</div>
+    </a>
+
+    <a class="track" href="https://www.youtube.com/results?search_query=J+Dilla+Life" target="_blank">
+      <div class="track-num">02</div>
+      <div class="track-info">
+        <div class="track-title">Life</div>
+        <div class="track-artist">J Dilla</div>
+      </div>
+      <div class="track-arrow">↗ YT</div>
+    </a>
+
+    <a class="track" href="https://www.youtube.com/results?search_query=Pete+Rock+Sun+God" target="_blank">
+      <div class="track-num">03</div>
+      <div class="track-info">
+        <div class="track-title">Sun God</div>
+        <div class="track-artist">Pete Rock</div>
+      </div>
+      <div class="track-arrow">↗ YT</div>
+    </a>
+
+    <a class="track" href="https://www.youtube.com/results?search_query=Common+The+Light" target="_blank">
+      <div class="track-num">04</div>
+      <div class="track-info">
+        <div class="track-title">The Light</div>
+        <div class="track-artist">Common</div>
+      </div>
+      <div class="track-arrow">↗ YT</div>
+    </a>
+
+    <a class="track" href="https://www.youtube.com/results?search_query=Lauryn+Hill+Ex-Factor" target="_blank">
+      <div class="track-num">05</div>
+      <div class="track-info">
+        <div class="track-title">Ex-Factor</div>
+        <div class="track-artist">Lauryn Hill</div>
+        <div class="track-note">Напоминает о ком-то. Не говорит о ком.</div>
+      </div>
+      <div class="track-arrow">↗ YT</div>
+    </a>
+  </div>
+
+  <!-- О ПЕРСОНАЖЕ -->
+  <div class="section" id="sec-about">
+    <div class="section-header">
+      <div class="section-tag">Досье</div>
+      <div class="section-title">О персонаже</div>
+    </div>
+
+    <div class="stat-row">
+      <div class="stat">
+        <div class="stat-val">28</div>
+        <div class="stat-label">Лет</div>
+      </div>
+      <div class="stat">
+        <div class="stat-val">35</div>
+        <div class="stat-label">Треков</div>
+      </div>
+      <div class="stat">
+        <div class="stat-val">200</div>
+        <div class="stat-label">Винилов</div>
+      </div>
+    </div>
+
+    <div class="about-block">
+      <div class="about-label">Роль</div>
+      <div class="about-text">
+        <strong>Rockerboy</strong> — Уличный художник / Битбоксер<br>
+        Cyberpunk RED · Night City · 2045<br>
+        Псевдоним: <strong>GRIM</strong>
+      </div>
+    </div>
+
+    <div class="about-block">
+      <div class="about-label">Философия</div>
+      <div class="about-text">
+        Дариус не против технологий как таковых. Он против синтетического искусства — того что притворяется живым не будучи им. ИИ-музыка в мире Cyberpunk RED для него то же что корпоративная застройка для жителей Сауспоинта: функционирует, выглядит прилично, но внутри — ничего чьего-то.
+        <br><br>
+        Его плейлист — это не ностальгия. Это принцип.
+      </div>
+    </div>
+
+    <div class="about-block">
+      <div class="about-label">Коллекция отца</div>
+      <div class="about-text">
+        200 виниловых пластинок. Хранит у себя. 8 штук украдены — включая оригинальный пресс <strong>Illmatic 1994</strong>. Ищет до сих пор. Никогда ничего не продал.
+      </div>
+    </div>
+  </div>
+
+
+</main>
+
+<footer>
+  <div>GRIM · NIGHT CITY · <span>2045</span></div>
+  <div>Cyberpunk RED · Rockerboy</div>
+</footer>
+
+<script>
+  function showSection(id) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('sec-' + id).classList.add('active');
+    event.currentTarget.classList.add('active');
+  }
+</script>
+
+</body>
+</html>
